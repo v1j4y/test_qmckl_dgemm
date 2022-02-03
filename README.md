@@ -12,4 +12,4 @@ make
 ./dgemm_test n
 ```
 
-n is the number of repetitions.
+`n` is the number of repetitions.
