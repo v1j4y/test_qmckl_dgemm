@@ -25,14 +25,14 @@ int main(int argc, char *argv[]) {
 
   M = DIM_M_MAX;
   N = DIM_N_MAX;
-	K = DIM_K_MAX;
+  K = DIM_K_MAX;
     
   qmckl_context context = qmckl_context_create();
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
   
   int64_t incRowA = K;
   int64_t incRowB = N;
-  int64_t incRowC = N;//ctx->C_tile.Nt;
+  int64_t incRowC = N;
   
   A = (double *)malloc( M * K * sizeof(double));
   B = (double *)malloc( K * N * sizeof(double));
@@ -64,7 +64,7 @@ int main(int argc, char *argv[]) {
 			   C, incRowC);
   }
   const uint64_t avx2dt = rdtsc() - avx2t0;
-  printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
+  printf("CPU-Cycles [QMCKL_DGEMM(AVX2_16)] = %f\n", 1e-9 * avx2dt/rep);
   
   qmckl_context_destroy(context);
   free(A);
