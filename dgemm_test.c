@@ -1,42 +1,34 @@
 #include <stdio.h>
 
-#include "mkl.h"
-
 #include "qmckl_dgemm.h"
 
-int main() {
+unsigned long long rdtsc(void)
+{
+  unsigned long long a, d;
+  __asm__ volatile ("rdtsc" : "=a" (a), "=d" (d));
+  return (d<<32) | a;
+}
+
+int main(int argc, char *argv[]) {
 
   double *A;
   double *B;
   double *C;
-  double *CUnpack;
-  double *ABlas;
-  double *BBlas;
-  double *DBlas;
   int64_t DIM_M, DIM_N, DIM_K;
   int64_t M, N, K;
-  int64_t MBlas, NBlas, KBlas;
-  int64_t incColA = 1;
-  int64_t incColB = 1;
-  int64_t incColC = 1;
-  int64_t iterM, iterN, iterK;
-  int64_t rep = 0;
   int i;
+  int64_t rep =(int64_t)atol(argv[1]);
   
   int64_t DIM_M_MAX =8*1024;
   int64_t DIM_N_MAX =6*1024;
   int64_t DIM_K_MAX =1024;
 
-  DIM_M = DIM_M_MAX;
-  DIM_N = DIM_N_MAX;
-	DIM_K = DIM_K_MAX;
+  M = DIM_M_MAX;
+  N = DIM_N_MAX;
+	K = DIM_K_MAX;
     
-  
   qmckl_context context = qmckl_context_create();
   qmckl_context_struct* const ctx = (qmckl_context_struct* const) context;
-  M = DIM_M;
-  N = DIM_N;
-  K = DIM_K;
   
   int64_t incRowA = K;
   int64_t incRowB = N;
@@ -59,9 +51,20 @@ int main() {
     C[i]= 0.0;
   }
   
+  // Initial call
   qmckl_dgemm_tiled_NN(context, M, N, K, A, incRowA,
 			   B, incRowB,
 			   C, incRowC);
+
+  const uint64_t avx2t0 = rdtsc();
+  // Subsequent calls
+  for(i = 0; i < rep; ++i) {
+    qmckl_dgemm_tiled_NN(context, M, N, K, A, incRowA,
+			   B, incRowB,
+			   C, incRowC);
+  }
+  const uint64_t avx2dt = rdtsc() - avx2t0;
+  printf("MyDGEMM(AVX2_16) = %f\n", 1e-9 * avx2dt/1);
   
   qmckl_context_destroy(context);
   free(A);
