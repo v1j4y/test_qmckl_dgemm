@@ -1,6 +1,6 @@
 # Test code for QMCKL-DGEMM
 
-## To install
+## To build
 
 ```
 make
