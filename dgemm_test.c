@@ -59,7 +59,7 @@ int main() {
     C[i]= 0.0;
   }
   
-  qmckl_dgemm_tiled_avx2_nn(context, A, incRowA,
+  qmckl_dgemm_tiled_NN(context, M, N, K, A, incRowA,
 			   B, incRowB,
 			   C, incRowC);
   
